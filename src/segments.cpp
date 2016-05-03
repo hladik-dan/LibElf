@@ -115,12 +115,12 @@ Elf_Addr LibElf::SegmentHeader::get_paddr()
     return paddr;
 }
 
-Elf_Word LibElf::SegmentHeader::get_filesz()
+Elf_Xword LibElf::SegmentHeader::get_filesz()
 {
     return filesz;
 }
 
-Elf_Word LibElf::SegmentHeader::get_memsz()
+Elf_Xword LibElf::SegmentHeader::get_memsz()
 {
     return memsz;
 }
@@ -130,7 +130,7 @@ Elf_Word LibElf::SegmentHeader::get_flags()
     return flags;
 }
 
-Elf_Word LibElf::SegmentHeader::get_align()
+Elf_Xword LibElf::SegmentHeader::get_align()
 {
     return align;
 }

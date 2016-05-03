@@ -47,10 +47,10 @@ namespace LibElf
             Elf_Off get_offset();
             Elf_Addr get_vaddr();
             Elf_Addr get_paddr();
-            Elf_Word get_filesz();
-            Elf_Word get_memsz();
+            Elf_Xword get_filesz();
+            Elf_Xword get_memsz();
             Elf_Word get_flags();
-            Elf_Word get_align();
+            Elf_Xword get_align();
 
             void set_type(Elf_Word value);
             void set_offset(Elf_Off value);
