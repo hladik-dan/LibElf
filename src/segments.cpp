@@ -11,6 +11,7 @@ LibElf::Segments::Segments(LibElf *lib_elf)
 
 LibElf::Segments::~Segments()
 {
+    this->clear();
 }
 
 bool LibElf::Segments::load()

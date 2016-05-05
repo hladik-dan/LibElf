@@ -2,11 +2,10 @@
 
 LibElf::LibElf::LibElf()
 {
-    elf_identification =
-        std::unique_ptr<ElfIdentification>(new ElfIdentification(this));
-    elf_header = std::unique_ptr<ElfHeader>(new ElfHeader(this));
-    sections = std::unique_ptr<Sections>(new Sections(this));
-    segments = std::unique_ptr<Segments>(new Segments(this));
+    elf_identification = std::make_unique<ElfIdentification>(this);
+    elf_header = std::make_unique<ElfHeader>(this);
+    sections = std::make_unique<Sections>(this);
+    segments = std::make_unique<Segments>(this);
 }
 
 LibElf::LibElf::~LibElf()

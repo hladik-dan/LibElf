@@ -1,6 +1,5 @@
 TEMPLATE = lib
-CONFIG += staticlib
-QMAKE_CXXFLAGS += -std=c++11
+CONFIG += staticlib c++14
 
 Debug:DESTDIR = bin/debug
 Debug:OBJECTS_DIR = bin/debug/.obj
