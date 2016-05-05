@@ -31,6 +31,16 @@ bool LibElf::Sections::load()
     return true;
 }
 
+bool LibElf::Sections::save()
+{
+    // Try to write section headers data
+    if (!write_headers())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
 bool LibElf::Sections::is_ok()
 {
     return ok;
@@ -72,7 +82,7 @@ bool LibElf::Sections::read_headers()
         // Create new section header
         SectionHeader *header = new SectionHeader(lib_elf);
 
-        // Load section header data
+        // Try to section header data
         if (!header->load())
             return false;
 
@@ -95,12 +105,32 @@ bool LibElf::Sections::read_sections()
 
         // If header's type is NOBITS then skip loading
         if (header->get_type() != SHT_NOBITS)
-            // Load data to section
+            // Try to load data to section
             if (!section->load())
                 return false;
 
         // Save pointer
         sections.push_back(section);
+    }
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::Sections::write_headers()
+{
+    // Set offset for section headers to write
+    Elf_Off sh_off = lib_elf->get_elf_header()->get_shoff();
+    lib_elf->get_ofstream()->seekp(sh_off);
+
+    for (Elf_Half i = 0; i < headers.size(); ++i)
+    {
+        // Get section header
+        SectionHeader *header = headers.at(i);
+
+        // Try to write section header data
+        if (!header->save())
+            return false;
     }
 
     // Everything went fine
@@ -127,6 +157,16 @@ bool LibElf::SectionHeader::load()
     // Convert data to correct endianness
     if (Helper::endian() != elf_identification->get_data())
         convert();
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SectionHeader::save()
+{
+    // Try to write ELF header data
+    if (!write())
+        return false;
 
     // Everything went fine
     return true;
@@ -478,6 +518,72 @@ bool LibElf::SectionHeader::read_64_bit()
 
     // Check if stream is good
     if (!ifs->good())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SectionHeader::write()
+{
+    // Check if class is set correctly
+    if (!elf_identification->is_32_bit() && !elf_identification->is_64_bit())
+        return false;
+    // Try to write values for 32-bit architecture
+    else if (elf_identification->is_32_bit() && !write_32_bit())
+        return false;
+    // Try to write values for 64-bit architecture
+    else if (elf_identification->is_64_bit() && !write_64_bit())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SectionHeader::write_32_bit()
+{
+    // Get stream
+    std::ofstream *ofs = lib_elf->get_ofstream();
+
+    // Try to write data
+    ofs->write(reinterpret_cast<char *>(&name), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&type), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&flags), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&addr), sizeof(Elf32_Addr));
+    ofs->write(reinterpret_cast<char *>(&offset), sizeof(Elf32_Off));
+    ofs->write(reinterpret_cast<char *>(&size), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&link), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&info), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&addralign), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&entsize), sizeof(Elf32_Word));
+
+    // Check if stream is good
+    if (!ofs->good())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SectionHeader::write_64_bit()
+{
+    // Get stream
+    std::ofstream *ofs = lib_elf->get_ofstream();
+
+    // Try to write data
+    ofs->write(reinterpret_cast<char *>(&name), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&type), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&flags), sizeof(Elf64_Xword));
+    ofs->write(reinterpret_cast<char *>(&addr), sizeof(Elf64_Addr));
+    ofs->write(reinterpret_cast<char *>(&offset), sizeof(Elf64_Off));
+    ofs->write(reinterpret_cast<char *>(&size), sizeof(Elf64_Xword));
+    ofs->write(reinterpret_cast<char *>(&link), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&info), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&addralign), sizeof(Elf64_Xword));
+    ofs->write(reinterpret_cast<char *>(&entsize), sizeof(Elf64_Xword));
+
+    // Check if stream is good
+    if (!ofs->good())
         return false;
 
     // Everything went fine

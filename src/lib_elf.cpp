@@ -113,6 +113,10 @@ bool LibElf::LibElf::save()
     // Try to save ELF header
     if (!elf_header->save())
         return false;
+
+    // Try to save Section Headers
+    if (!sections->save())
+        return false;
     
     // Close the file
     ofs.close();

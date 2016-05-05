@@ -20,6 +20,7 @@ namespace LibElf
             ~Sections();
 
             bool load();
+            bool save();
             bool is_ok();
             void clear();
 
@@ -29,6 +30,7 @@ namespace LibElf
         private:
             bool read_headers();
             bool read_sections();
+            bool write_headers();
 
         private:
             bool ok = false;
@@ -46,6 +48,7 @@ namespace LibElf
             ~SectionHeader();
 
             bool load();
+            bool save();
 
             Elf_Word get_name();
             Elf_Word get_type();
@@ -95,6 +98,9 @@ namespace LibElf
             bool read();
             bool read_32_bit();
             bool read_64_bit();
+            bool write();
+            bool write_32_bit();
+            bool write_64_bit();
             void convert();
             void convert_32_bit();
             void convert_64_bit();
