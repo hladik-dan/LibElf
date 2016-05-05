@@ -15,7 +15,8 @@ Load data from file
 #include "lib_elf.h"
 
 LibElf::LibElf lib_elf;
-lib_elf.load("filename");
+if (lib_elf.load("filename"))
+    return false;
 ```
 <br />
 Get data
