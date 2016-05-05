@@ -136,6 +136,6 @@ namespace LibElf
             SectionHeader *section_header;
 
             Elf_Xword size;
-            char *data;
+            std::vector<char> data;
     };
 }

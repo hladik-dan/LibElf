@@ -632,13 +632,12 @@ LibElf::Section::Section(LibElf *lib_elf, Elf_Half shndx)
     this->section_header = lib_elf->get_sections()->get_header(shndx);
     this->size = this->section_header->get_size();
 
-    // Alloc memory
-    data = new char[this->section_header->get_size()];
+    // Prepare vector
+    data.resize(size);
 }
 
 LibElf::Section::~Section()
 {
-    delete[] data;
 }
 
 bool LibElf::Section::load()
@@ -650,7 +649,7 @@ bool LibElf::Section::load()
     ifs->seekg(section_header->get_offset());
 
     // Try to read data
-    ifs->read(data, section_header->get_size());
+    ifs->read(&data[0], section_header->get_size());
 
     // Check if stream is good
     if (!ifs->good())
