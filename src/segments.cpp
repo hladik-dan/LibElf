@@ -37,15 +37,13 @@ void LibElf::Segments::clear()
     // Reset flag
     ok = false;
 
-    // Delete program headers
-    for (auto it = headers.begin(); it != headers.end(); ++it)
-        delete *it;
+    // Clear vectors
     headers.clear();
 }
 
 LibElf::SegmentHeader *LibElf::Segments::get_header(Elf_Half shndx)
 {
-    return headers.at(shndx);
+    return headers.at(shndx).get();
 }
 
 bool LibElf::Segments::read_headers()
@@ -57,7 +55,7 @@ bool LibElf::Segments::read_headers()
     for (Elf_Half i = 0; i < lib_elf->get_elf_header()->get_phnum(); ++i)
     {
         // Create new section header
-        SegmentHeader *header = new SegmentHeader(lib_elf);
+        auto header = std::make_shared<SegmentHeader>(lib_elf);
 
         // Load section header data
         if (!header->load())

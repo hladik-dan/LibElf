@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include "lib_data.h"
@@ -32,7 +33,7 @@ namespace LibElf
 
             LibElf *lib_elf;
 
-            std::vector<SegmentHeader *> headers;
+            std::vector<std::shared_ptr<SegmentHeader>> headers;
     };
 
     class SegmentHeader

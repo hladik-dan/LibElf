@@ -51,24 +51,19 @@ void LibElf::Sections::clear()
     // Reset flag
     ok = false;
 
-    // Delete sections
-    for (auto it = sections.begin(); it != sections.end(); ++it)
-        delete *it;
+    // Clear vectors
     sections.clear();
-    // Delete section headers
-    for (auto it = headers.begin(); it != headers.end(); ++it)
-        delete *it;
     headers.clear();
 }
 
 LibElf::SectionHeader *LibElf::Sections::get_header(Elf_Half shndx)
 {
-    return headers.at(shndx);
+    return headers.at(shndx).get();
 }
 
 LibElf::Section *LibElf::Sections::get_section(Elf_Half shndx)
 {
-    return sections.at(shndx);
+    return sections.at(shndx).get();
 }
 
 bool LibElf::Sections::read_headers()
@@ -80,7 +75,7 @@ bool LibElf::Sections::read_headers()
     for (Elf_Half i = 0; i < lib_elf->get_elf_header()->get_shnum(); ++i)
     {
         // Create new section header
-        SectionHeader *header = new SectionHeader(lib_elf);
+        auto header = std::make_shared<SectionHeader>(lib_elf);
 
         // Try to section header data
         if (!header->load())
@@ -101,7 +96,7 @@ bool LibElf::Sections::read_sections()
         SectionHeader *header = get_header(i);
 
         // Create new section
-        Section *section = new Section(lib_elf, i);
+        auto section = std::make_shared<Section>(lib_elf, i);
 
         // If header's type is NOBITS then skip loading
         if (header->get_type() != SHT_NOBITS)
@@ -126,7 +121,7 @@ bool LibElf::Sections::write_headers()
     for (Elf_Half i = 0; i < headers.size(); ++i)
     {
         // Get section header
-        SectionHeader *header = headers.at(i);
+        SectionHeader *header = get_header(i);
 
         // Try to write section header data
         if (!header->save())

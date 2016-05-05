@@ -37,8 +37,8 @@ namespace LibElf
 
             LibElf *lib_elf;
 
-            std::vector<SectionHeader *> headers;
-            std::vector<Section *> sections;
+            std::vector<std::shared_ptr<SectionHeader>> headers;
+            std::vector<std::shared_ptr<Section>> sections;
     };
 
     class SectionHeader
