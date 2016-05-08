@@ -27,6 +27,16 @@ bool LibElf::Segments::load()
     return true;
 }
 
+bool LibElf::Segments::save()
+{
+    // Try to write segment headers data
+    if (!write_headers())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
 bool LibElf::Segments::is_ok()
 {
     return ok;
@@ -69,6 +79,26 @@ bool LibElf::Segments::read_headers()
     return true;
 }
 
+bool LibElf::Segments::write_headers()
+{
+    // Set offset for segment headers to read
+    Elf_Off ph_off = lib_elf->get_elf_header()->get_phoff();
+    lib_elf->get_ifstream()->seekg(ph_off);
+
+    for (Elf_Half i = 0; i < headers.size(); ++i)
+    {
+        // Get section header
+        SegmentHeader *header = get_header(i);
+
+        // Try to write section header data
+        if (!header->save())
+            return false;
+    }
+
+    // Everything went fine
+    return true;
+}
+
 LibElf::SegmentHeader::SegmentHeader(LibElf *lib_elf)
 {
     this->lib_elf = lib_elf;
@@ -89,6 +119,16 @@ bool LibElf::SegmentHeader::load()
     // Convert data to correct endianness
     if (Helper::endian() != elf_identification->get_data())
         convert();
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SegmentHeader::save()
+{
+    // Try to write ELF header data
+    if (!write())
+        return false;
 
     // Everything went fine
     return true;
@@ -367,6 +407,68 @@ bool LibElf::SegmentHeader::read_64_bit()
 
     // Check if stream is good
     if (!ifs->good())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SegmentHeader::write()
+{
+    // Check if class is set correctly
+    if (!elf_identification->is_32_bit() && !elf_identification->is_64_bit())
+        return false;
+    // Try to write values for 32-bit architecture
+    else if (elf_identification->is_32_bit() && !write_32_bit())
+        return false;
+    // Try to write values for 64-bit architecture
+    else if (elf_identification->is_64_bit() && !write_64_bit())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SegmentHeader::write_32_bit()
+{
+    // Get stream
+    std::ofstream *ofs = lib_elf->get_ofstream();
+
+    // Try to write data
+    ofs->write(reinterpret_cast<char *>(&type), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&offset), sizeof(Elf32_Off));
+    ofs->write(reinterpret_cast<char *>(&vaddr), sizeof(Elf32_Addr));
+    ofs->write(reinterpret_cast<char *>(&paddr), sizeof(Elf32_Addr));
+    ofs->write(reinterpret_cast<char *>(&filesz), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&memsz), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&flags), sizeof(Elf32_Word));
+    ofs->write(reinterpret_cast<char *>(&align), sizeof(Elf32_Word));
+
+    // Check if stream is good
+    if (!ofs->good())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::SegmentHeader::write_64_bit()
+{
+    // Get stream
+    std::ofstream *ofs = lib_elf->get_ofstream();
+
+    // Try to write data
+    ofs->write(reinterpret_cast<char *>(&type), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&flags), sizeof(Elf64_Word));
+    ofs->write(reinterpret_cast<char *>(&offset), sizeof(Elf64_Off));
+    ofs->write(reinterpret_cast<char *>(&vaddr), sizeof(Elf64_Addr));
+    ofs->write(reinterpret_cast<char *>(&paddr), sizeof(Elf64_Addr));
+    ofs->write(reinterpret_cast<char *>(&filesz), sizeof(Elf64_Xword));
+    ofs->write(reinterpret_cast<char *>(&memsz), sizeof(Elf64_Xword));
+    ofs->write(reinterpret_cast<char *>(&align), sizeof(Elf64_Xword));
+
+    // Check if stream is good
+    if (!ofs->good())
         return false;
 
     // Everything went fine

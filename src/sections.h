@@ -31,6 +31,7 @@ namespace LibElf
             bool read_headers();
             bool read_sections();
             bool write_headers();
+            bool write_sections();
 
         private:
             bool ok = false;
@@ -129,6 +130,7 @@ namespace LibElf
             ~Section();
 
             bool load();
+            bool save();
             char *get_pointer(Elf_Xword i);
 
         private:

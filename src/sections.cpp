@@ -132,6 +132,24 @@ bool LibElf::Sections::write_headers()
     return true;
 }
 
+bool LibElf::Sections::write_sections()
+{
+    for (Elf_Half i = 0; i < lib_elf->get_elf_header()->get_shnum(); ++i)
+    {
+        SectionHeader *header = get_header(i);
+        Section *section = get_section(i);
+
+        // If header's type is NOBITS then skip saving
+        if (header->get_type() != SHT_NOBITS)
+            // Try to save data to section
+            if (!section->save())
+                return false;
+    }
+
+    // Everything went fine
+    return true;
+}
+
 LibElf::SectionHeader::SectionHeader(LibElf *lib_elf)
 {
     this->lib_elf = lib_elf;
@@ -648,6 +666,25 @@ bool LibElf::Section::load()
 
     // Check if stream is good
     if (!ifs->good())
+        return false;
+
+    // Everything went fine
+    return true;
+}
+
+bool LibElf::Section::save()
+{
+    // Get stream
+    std::ofstream *ofs = lib_elf->get_ofstream();
+
+    // Set offset for data to write
+    ofs->seekp(section_header->get_offset());
+
+    // Try to write data
+    ofs->write(&data[0], section_header->get_size());
+
+    // Check if stream is good
+    if (!ofs->good())
         return false;
 
     // Everything went fine
